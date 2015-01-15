@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
@@ -97,7 +97,7 @@
             <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
         </config-file>
 
-        <lib-file src="libs/android/android-support-v4.jar" />
+        <!--<lib-file src="libs/android/android-support-v4.jar" />-->
 
         <source-file src="src/android/LocalNotification.java" 		target-dir="src/de/appplant/cordova/plugin/localnotification" />
         <source-file src="src/android/Receiver.java"          		target-dir="src/de/appplant/cordova/plugin/localnotification" />

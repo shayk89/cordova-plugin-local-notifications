@@ -67,7 +67,8 @@ exports._defaults = {
     badge:      -1,
     id:         '0',
     json:       '',
-    repeat:     ''
+    repeat:     '',
+    date:       undefined
 };
 
 
@@ -140,7 +141,7 @@ exports.update = function (opts, callback, scope) {
     for (var i = 0; i < notifications.length; i++) {
         var properties = notifications[i];
 
-        this.convertProperties(properties);
+        this.convertUpdateProperties(properties);
     }
 
     this.exec('update', notifications, callback, scope);
@@ -208,6 +209,29 @@ exports.cancelAll = function (callback, scope) {
 };
 
 /**
+ * Check if a notification with an ID exists.
+ *
+ * @param {String} id
+ *      The ID of the notification
+ * @param {Function} callback
+ *      A callback function to be called with the list
+ * @param {Object?} scope
+ *      The scope for the callback function
+ */
+exports.exist = function (id, callback, scope) {
+    var notId = (id || '0').toString();
+
+    this.exec('exist', notId, callback, scope);
+};
+
+/**
+ * Alias for `exist`.
+ */
+exports.exists = function () {
+    this.exist.apply(this, arguments);
+};
+
+/**
  * Check if a notification with an ID is scheduled.
  *
  * @param {String} id
@@ -240,7 +264,26 @@ exports.isTriggered = function (id, callback, scope) {
 };
 
 /**
- * List all currently pending notifications.
+ * List all local notification IDs.
+ *
+ * @param {Function} callback
+ *      A callback function to be called with the list
+ * @param {Object?} scope
+ *      The scope for the callback function
+ */
+exports.getAllIds = function (callback, scope) {
+    this.exec('getAllIds', null, callback, scope);
+};
+
+/**
+ * Alias for `getAllIds`.
+ */
+exports.getIds = function () {
+    this.getAllIds.apply(this, arguments);
+};
+
+/**
+ * List all scheduled notification IDs.
  *
  * @param {Function} callback
  *      A callback function to be called with the list
@@ -252,7 +295,7 @@ exports.getScheduledIds = function (callback, scope) {
 };
 
 /**
- * List all triggered notifications.
+ * List all triggered notification IDs.
  *
  * @param {Function} callback
  *      A callback function to be called with the list
@@ -264,7 +307,50 @@ exports.getTriggeredIds = function (callback, scope) {
 };
 
 /**
- * List all properties for given scheduled notifications.
+ * Property list for given local notifications.
+ * If called without IDs, all notification will be returned.
+ *
+ * @param {Number[]?} ids
+ *      Set of notification IDs
+ * @param {Function} callback
+ *      A callback function to be called with the list
+ * @param {Object?} scope
+ *      The scope for the callback function
+ */
+exports.get = function () {
+    var args = Array.apply(null, arguments);
+
+    if (typeof args[0] == 'function') {
+        args.unshift([]);
+    }
+
+    var ids      = args[0],
+        callback = args[1],
+        scope    = args[2];
+
+    if (!Array.isArray(ids)) {
+        ids = [ids];
+    }
+
+    ids = this.convertIds(ids);
+
+    this.exec('getAll', ids, callback, scope);
+};
+
+/**
+ * Property list for all local notifications.
+ *
+ * @param {Function} callback
+ *      A callback function to be called with the list
+ * @param {Object?} scope
+ *      The scope for the callback function
+ */
+exports.getAll = function (callback, scope) {
+    this.exec('getAll', null, callback, scope);
+};
+
+/**
+ * Property list for given scheduled notifications.
  * If called without IDs, all notification will be returned.
  *
  * @param {Number[]?} ids
@@ -307,7 +393,7 @@ exports.getAllScheduled = function (callback, scope) {
 };
 
 /**
- * List all properties for given triggered notifications.
+ * Property list for given triggered notifications.
  * If called without IDs, all notification will be returned.
  *
  * @param {Number[]?} ids
@@ -473,6 +559,42 @@ exports.oncancel = function (id, state, json, data) {};
  */
 exports.onclear = function (id, state, json, data) {};
 
+/**
+ * Get fired when a repeating notification should be updated.
+ *
+ * @param {String} id
+ *      The ID of the notification
+ * @param {String} state
+ *      Either "foreground" or "background"
+ * @param {String} json
+ *      A custom (JSON) string
+ * @param {Object} data
+ *      The notification properties
+ * @return {Object} JSONObject with updatevalues
+ */
+exports.onupdate = function (id, state, json, data) {
+	return null;
+};
+	
+/**
+ * Is called from the native part to receive the onupdate resultarray and send it back to native.
+ *
+ * @param {String} id
+ *      The ID of the notification
+ * @param {String} state
+ *      Either "foreground" or "background"
+ * @param {String} json
+ *      A custom (JSON) string
+ * @param {Object} data
+ *      The notification properties
+ */
+exports.onupdateCall = function (id, state, json, data) {
+	var updates = exports.onupdate(id, state, json, data);
+	if (updates != null){
+		updates.id = id;
+		update(updates,null,null);
+	};
+};
 
 /**
  * @private
@@ -538,6 +660,45 @@ exports.convertProperties = function (options) {
     if (options.date === undefined || options.date === null) {
         options.date = new Date();
     }
+
+    if (typeof options.date == 'object') {
+        options.date = Math.round(options.date.getTime()/1000);
+    }
+
+    if (typeof options.json == 'object') {
+        options.json = JSON.stringify(options.json);
+    }
+
+    return options;
+};
+
+/**
+ * @private
+ *
+ * Convert the passed values to their required type only for update function.
+ *
+ * @param {Object} options
+ *      Set of custom values
+ *
+ * @retrun {Object}
+ *      The converted property list
+ */
+exports.convertUpdateProperties = function (options) {
+
+    options.id         = options.id.toString();
+    options.title      = options.title.toString();
+    options.message    = options.message.toString();
+    options.autoCancel = options.autoCancel === true;
+
+    if (isNaN(options.id)) {
+        options.id = this.getDefaults().id;
+    }
+
+    if (isNaN(options.badge)) {
+        options.badge = this.getDefaults().badge;
+    }
+
+    options.badge = Number(options.badge);
 
     if (typeof options.date == 'object') {
         options.date = Math.round(options.date.getTime()/1000);

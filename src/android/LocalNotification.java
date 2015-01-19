@@ -239,7 +239,7 @@ public class LocalNotification extends CordovaPlugin {
     		options.setInitDate();
         	nWrapper.schedule(options);
         	JSONArray fireData= new JSONArray().put(options.getJSONObject());
-        	//fireEvent("add", options.getId(),options.getJSON(), fireData);
+        	fireEvent("add", options.getId(),options.getJSON(), fireData);
         	AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
 alertDialog.setTitle("Alert");
 alertDialog.setMessage("fireEvent(add, "+options.getId()+","+options.getJSON()+", "+fireData+");+");

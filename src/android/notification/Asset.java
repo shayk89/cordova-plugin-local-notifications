@@ -114,7 +114,7 @@ public class Asset {
 		} else if (path.startsWith("http")){
 			return getUriForHTTP(path);
 		}
-		return Uri.EMPTY;
+		return Uri.parse(path);
 	}
     
 

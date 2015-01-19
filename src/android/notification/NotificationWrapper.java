@@ -37,7 +37,6 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat.Builder;
-import android.util.Log;
 import android.widget.Toast;
 
 /**
@@ -144,7 +143,7 @@ public class NotificationWrapper {
 		try {
 			arguments = new JSONObject(alarms.get(id).toString());
 		} catch (JSONException e) {
-			Log.e("NotificationWrapper", "Update failed. No Notification available for the given id: " + id );
+			e.printStackTrace();
 			return;
 		}
 		arguments = updateArguments(arguments, updates);
@@ -189,7 +188,6 @@ public class NotificationWrapper {
 				unpersist(notificationId);
 			}
 		} catch (JSONException e) {
-			unpersist(notificationId);
 			e.printStackTrace();
 			return;
 		}
@@ -341,21 +339,6 @@ public class NotificationWrapper {
     		}
     		if(!updates.isNull("icon")){
     			arguments.put("icon", updates.get("icon"));
-    		}
-    		if(!updates.isNull("date")){
-    			arguments.put("date", updates.get("date"));
-    		}
-    		if(!updates.isNull("repeat")){
-    			arguments.put("repeat", updates.get("repeat"));
-    		}
-    		if(!updates.isNull("json")){
-    			arguments.put("json", updates.get("json"));
-    		}
-    		if(!updates.isNull("autoCancel")){
-    			arguments.put("autoCancel", updates.get("autoCancel"));
-    		}
-    		if(!updates.isNull("ongoing")){
-    			arguments.put("ongoing", updates.get("ongoing"));
     		}
     	} catch (JSONException jse){
     		jse.printStackTrace();

@@ -281,9 +281,9 @@ public class Manager {
     
     
     /**
-     * Retrieves a list with all currently pending notification JSONObjects that matches with the given String-Array
+     * Retrieves a list with all currently pending notification JSONObject.
      *
-     * @return JSONArray with notification-JSONObjects 
+     * @return JSONArray with all notification-JSONObjects
      */
     public JSONArray getAll(JSONArray ids){
         SharedPreferences settings = getSharedPreferences();
